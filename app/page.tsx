@@ -1,65 +1,147 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { getAllPosts, CATEGORIES } from '@/lib/posts';
 
-export default function Home() {
+function PostCard({ post, featured = false }: { post: ReturnType<typeof getAllPosts>[0]; featured?: boolean }) {
+  const cat = CATEGORIES.find(c => c.slug === post.category.toLowerCase()) || CATEGORIES[0];
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Link href={`/${post.slug}`} style={{ textDecoration: 'none' }}>
+      <article
+        className="card-hover"
+        style={{
+          background: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderRadius: '12px',
+          padding: featured ? '28px' : '20px',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          cursor: 'pointer',
+        }}
+      >
+        <div style={{ fontSize: featured ? '56px' : '40px', lineHeight: 1 }}>{post.emoji}</div>
+        <div>
+          <span
+            className="category-badge"
+            style={{ background: `${cat.color}22`, color: cat.color, border: `1px solid ${cat.color}44` }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {cat.emoji} {post.category}
+          </span>
         </div>
-      </main>
+        <h2
+          style={{
+            fontSize: featured ? '1.5rem' : '1.05rem',
+            fontWeight: 800,
+            color: '#f0f0f0',
+            lineHeight: 1.25,
+            flex: 1,
+          }}
+        >
+          {post.title}
+        </h2>
+        <p style={{ fontSize: '14px', color: '#888', lineHeight: 1.5 }}>
+          {post.excerpt}
+        </p>
+        <div style={{ fontSize: '12px', color: '#555', display: 'flex', gap: '12px' }}>
+          <span>📅 {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span>⏱ {post.readTime}</span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function AdUnit({ width = '100%', height = 90, label = 'Advertisement' }: { width?: string; height?: number; label?: string }) {
+  return (
+    <div className="ad-unit" style={{ width, height }}>
+      <span>{label}</span>
     </div>
+  );
+}
+
+export default function HomePage() {
+  const posts = getAllPosts();
+  const featured = posts.slice(0, 1)[0];
+  const recent = posts.slice(1, 7);
+  const more = posts.slice(7, 19);
+
+  return (
+    <>
+      {/* Hero */}
+      <div style={{ textAlign: 'center', marginBottom: '40px', padding: '32px 0 16px' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1.1, marginBottom: '12px' }}>
+          Facts So{' '}
+          <span className="gradient-text">Disgusting</span>
+          <br />You Can&apos;t Stop Reading 🤢
+        </h1>
+        <p style={{ color: '#888', fontSize: '1rem', maxWidth: '480px', margin: '0 auto' }}>
+          Gross science. Weird history. Bizarre animals. The internet&apos;s most unhinged facts, delivered daily.
+        </p>
+      </div>
+
+      {/* Top Ad */}
+      <AdUnit height={90} label="Advertisement — 728×90" />
+
+      {/* Categories */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', margin: '24px 0' }}>
+        {CATEGORIES.map(cat => (
+          <Link
+            key={cat.slug}
+            href={`/category/${cat.slug}`}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '24px',
+              fontSize: '13px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              background: `${cat.color}18`,
+              color: cat.color,
+              border: `1px solid ${cat.color}33`,
+            }}
+          >
+            {cat.emoji} {cat.name}
+          </Link>
+        ))}
+      </div>
+
+      {posts.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '80px 0', color: '#555' }}>
+          <p style={{ fontSize: '48px' }}>🤢</p>
+          <p style={{ marginTop: '16px' }}>Content loading... check back soon.</p>
+        </div>
+      ) : (
+        <>
+          {/* Featured + sidebar */}
+          {featured && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2fr) minmax(0,1fr)', gap: '20px', marginBottom: '32px' }}
+              className="featured-grid">
+              <PostCard post={featured} featured />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <h3 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>Trending Now</h3>
+                {recent.slice(0, 3).map(p => (
+                  <PostCard key={p.slug} post={p} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Mid Ad */}
+          <AdUnit height={90} label="Advertisement — 728×90" />
+
+          {/* Main grid */}
+          <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '32px 0 16px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            🔥 Latest Grossness
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            {[...recent.slice(3), ...more].map(post => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+
+          {/* Bottom Ad */}
+          <AdUnit height={250} label="Advertisement — 300×250" />
+        </>
+      )}
+    </>
   );
 }
